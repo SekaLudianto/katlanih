@@ -65,7 +65,6 @@ export const GamePage: React.FC<GamePageProps> = (props) => {
                     <WordleGame
                         ref={props.wordleGameRef}
                         theme={props.theme}
-                        setModal={props.setModal}
                         leaderboard={props.leaderboard}
                         onScoresCalculated={props.onScoresCalculated}
                         showToast={props.showToast}
@@ -96,7 +95,6 @@ export const GamePage: React.FC<GamePageProps> = (props) => {
                         <WordleGame
                             ref={props.wordleGameRef}
                             theme={props.theme}
-                            setModal={props.setModal}
                             leaderboard={props.leaderboard}
                             onScoresCalculated={props.onScoresCalculated}
                             showToast={props.showToast}

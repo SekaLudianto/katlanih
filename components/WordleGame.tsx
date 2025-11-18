@@ -7,7 +7,6 @@ import { translations } from '../localization';
 
 interface WordleGameProps {
     theme: Theme;
-    setModal: (modal: { isOpen: boolean; title: string; content: React.ReactNode }) => void;
     leaderboard: LeaderboardEntry[];
     onScoresCalculated: (winners: RoundWinner[]) => void;
     showToast: (message: string, type?: ToastState['type']) => void;
@@ -29,7 +28,7 @@ interface BestGuess {
 const ROUND_DURATION = 300; // 5 minutes in seconds
 const RESTART_DURATION = 10; // 10 seconds
 
-export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme, setModal, leaderboard, onScoresCalculated, showToast, t }, ref) => {
+export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme, leaderboard, onScoresCalculated, showToast, t }, ref) => {
     const [targetWord, setTargetWord] = useState('');
     const [guesses, setGuesses] = useState<Tile[][]>([]);
     const [guessers, setGuessers] = useState<ChatMessage[]>([]);

@@ -1,5 +1,3 @@
-import { Language } from './types';
-
 const translationData = {
     // Header
     header_title: {
@@ -161,8 +159,6 @@ const translationData = {
         id: "Anda sudah menyelesaikan kata ini!"
     },
 };
-
-type TranslationData = typeof translationData;
 
 // FIX: Updated the generic constraint to be more robust, fixing all type errors.
 // This function processes the raw data into a usable format for each language
