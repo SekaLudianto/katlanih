@@ -83,3 +83,10 @@ export interface ToastState {
 }
 
 export type Language = 'en' | 'id';
+
+// FIX: Exported WordleGameHandle interface so it can be used in other modules.
+export interface WordleGameHandle {
+    handleGuess: (guess: string, userData: ChatMessage) => void;
+    startRound: () => void; // Changed from startNextWord to startRound
+    forceEndRound: () => void;
+}

@@ -11,6 +11,8 @@ import { Toast } from './components/Toast';
 import { GiftAlert } from './components/GiftAlert';
 import { translations } from './localization';
 
+const LEADERBOARD_STORAGE_KEY = 'katla-leaderboard';
+
 const App: React.FC = () => {
     const [theme, setTheme] = useState<Theme>(THEMES.slate);
     const [language, setLanguage] = useState<Language>('en');
@@ -23,7 +25,15 @@ const App: React.FC = () => {
 
     const [hasConnectedOnce, setHasConnectedOnce] = useState(false);
     const [lastUniqueId, setLastUniqueId] = useState('');
-    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => {
+        try {
+            const savedLeaderboard = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
+            return savedLeaderboard ? JSON.parse(savedLeaderboard) : [];
+        } catch (error) {
+            console.error("Could not load leaderboard from localStorage", error);
+            return [];
+        }
+    });
     const [isSimulationMode, setIsSimulationMode] = useState(false);
 
     // Gift Alert State
@@ -42,6 +52,15 @@ const App: React.FC = () => {
         setConnectionState(prev => ({ ...prev, message: t.connect_init }));
     }, [t]);
 
+    // Save leaderboard to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(leaderboard));
+        } catch (error) {
+            console.error("Could not save leaderboard to localStorage", error);
+        }
+    }, [leaderboard]);
+
     const showToast = useCallback((message: string, type: ToastState['type'] = 'error', duration = 3000) => {
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
         setToast({ isOpen: true, message, type });
@@ -55,7 +74,7 @@ const App: React.FC = () => {
         const comment = msg.comment.trim().toLowerCase();
 
         if (comment === '!next') {
-            wordleGameRef.current?.startNextWord();
+            wordleGameRef.current?.startRound(); // Changed to startRound
             return;
         }
 
@@ -126,7 +145,7 @@ const App: React.FC = () => {
         setChatMessages([]);
         setGiftMessages([]);
         setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
-        setLeaderboard([]);
+        setLeaderboard([]); // This will clear the state and localStorage via the useEffect hook
         
         setConnectionState({ status: 'connecting', message: t.connect_connecting(uniqueId) });
         tiktokSocket.connect(effectiveUniqueId);

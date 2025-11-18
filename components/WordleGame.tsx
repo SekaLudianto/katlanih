@@ -1,7 +1,6 @@
 
-
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState } from '../types';
+import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState, WordleGameHandle } from '../types';
 import { WORD_LENGTH, MAX_SCORE, DECAY_RATE } from '../constants';
 import { Icons } from './Icons';
 import { translations } from '../localization';
@@ -12,12 +11,6 @@ interface WordleGameProps {
     onScoresCalculated: (winners: RoundWinner[]) => void;
     showToast: (message: string, type?: ToastState['type']) => void;
     t: typeof translations.en;
-}
-
-export interface WordleGameHandle {
-    handleGuess: (guess: string, userData: ChatMessage) => void;
-    startNextWord: () => void;
-    forceEndRound: () => void;
 }
 
 interface BestGuess {
@@ -62,9 +55,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         }
     }, [guesses]);
 
-    const startNextWord = useCallback(() => {
-        if (gameState === 'running' || wordList.length === 0) return;
-        
+    const startNextWordInternal = useCallback(() => { // Renamed to internal helper
         const randomWord = wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
         setTargetWord(randomWord);
         setGuesses([]);
@@ -74,7 +65,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         setStartTime(Date.now());
         setGameState('running');
         console.log(`New Word: ${randomWord}`);
-    }, [wordList, gameState]);
+    }, [wordList]);
 
     const startRound = useCallback(() => {
         if (wordList.length === 0) {
@@ -88,7 +79,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         setBestGuess(null);
         setTimeLeft(ROUND_DURATION);
         
-        startNextWord();
+        startNextWordInternal(); // Call the internal helper
         
         timerRef.current = setInterval(() => {
             setTimeLeft(prev => {
@@ -100,7 +91,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 return prev - 1;
             });
         }, 1000);
-    }, [wordList, startNextWord]);
+    }, [wordList, startNextWordInternal]);
 
     useEffect(() => {
         if (gameState === 'idle' && wordList.length > 0) {
@@ -110,6 +101,11 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
 
     useEffect(() => {
         if (gameState === 'round_over') {
+            // FIX: If there were any winners in the round, calculate their scores before starting the next.
+            if (roundWinners.length > 0) {
+                onScoresCalculated(roundWinners);
+            }
+
             setAutoRestartTimeLeft(RESTART_DURATION);
             autoRestartTimerRef.current = setInterval(() => {
                 setAutoRestartTimeLeft(prev => {
@@ -125,7 +121,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         return () => {
             if (autoRestartTimerRef.current) clearInterval(autoRestartTimerRef.current);
         };
-    }, [gameState, startRound]);
+    }, [gameState, startRound, onScoresCalculated, roundWinners]);
 
 
     useEffect(() => {
@@ -190,7 +186,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 const updatedWinners = [...roundWinners, newWinner].sort((a,b) => a.duration - b.duration);
                 setRoundWinners(updatedWinners);
 
-                if (updatedWinners.length >= 3) {
+                if (updatedWinners.length >= 10) {
                     onScoresCalculated(updatedWinners);
                     setGameState('solved');
                 }
@@ -233,7 +229,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
             
             setIsProcessing(false);
         },
-        startNextWord,
+        startRound, // Exposing startRound now
         forceEndRound: () => {
             if (gameState === 'running') {
                 onScoresCalculated(roundWinners);
@@ -332,7 +328,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 p-4 animate-fade-in">
                     
                     {(gameState === 'solved' || gameState === 'leaderboard' || gameState === 'round_over') && (
-                        <div className={`w-full max-w-md p-4 rounded-2xl ${theme.containerBg} border ${theme.tileBorder} shadow-2xl`}>
+                        <div className="w-full max-w-md p-4 rounded-2xl ${theme.containerBg} border ${theme.tileBorder} shadow-2xl">
                             {gameState === 'solved' && (
                                 <div className="flex flex-col items-center justify-center animate-fade-in">
                                     <h3 className="text-2xl font-bold mb-4 text-cyan-400">{t.overlay_winners_title}</h3>
