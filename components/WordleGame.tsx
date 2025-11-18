@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
 import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState } from '../types';
 import { WORD_LENGTH, MAX_SCORE, DECAY_RATE } from '../constants';
@@ -251,7 +252,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
 
     return (
         <div className={`relative p-3 md:p-6 rounded-2xl shadow-xl ${theme.containerBg} flex flex-col h-full`}>
-            <div className={`flex flex-col h-full transition-all duration-300 ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+            <div className={`flex flex-col h-full min-h-0 transition-all duration-300 ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-2 md:mb-4">
                     <h2 className="text-xl md:text-2xl font-bold text-white mb-2 sm:mb-0">{t.game_title}</h2>
                      <p className="font-semibold text-white/60">{t.game_subtitle}</p>
