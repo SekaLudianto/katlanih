@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Theme, RoomStats, ChatMessage, GiftMessage, AppTab, ConnectionState, LeaderboardEntry, RoundWinner, ToastState, Language } from '../types';
 import { RoomStatsDisplay } from '../components/RoomStatsDisplay';
-import { WordleGame, WordleGameHandle } from '../components/WordleGame';
+import { WordleGame } from '../components/WordleGame';
+import { WordleGameHandle } from '../types';
 import { ChatBox } from '../components/ChatBox';
 import { GiftBox } from '../components/GiftBox';
 import { Icons } from '../components/Icons';
