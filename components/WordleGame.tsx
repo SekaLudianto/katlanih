@@ -186,7 +186,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 const updatedWinners = [...roundWinners, newWinner].sort((a,b) => a.duration - b.duration);
                 setRoundWinners(updatedWinners);
 
-                if (updatedWinners.length >= 10) {
+                if (updatedWinners.length >= 3) {
                     onScoresCalculated(updatedWinners);
                     setGameState('solved');
                 }
