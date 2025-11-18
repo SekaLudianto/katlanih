@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import tiktokSocket from './tiktokSocket';
-import { Theme, ConnectionState, RoomStats, ChatMessage, GiftMessage, LeaderboardEntry, RoundWinner, ToastState, Language } from './types';
+import { Theme, ConnectionState, RoomStats, ChatMessage, GiftMessage, LeaderboardEntry, RoundWinner, ToastState, Language, WordleGameHandle } from './types';
 import { THEMES, MODERATOR_USERNAMES } from './constants';
 import { ConnectionPage } from './pages/ConnectionPage';
 import { GamePage } from './pages/GamePage';
-import { WordleGameHandle } from './components/WordleGame';
 import { Modal } from './components/Modal';
 import { Toast } from './components/Toast';
 import { GiftAlert } from './components/GiftAlert';
@@ -14,7 +13,7 @@ import { translations } from './localization';
 const LEADERBOARD_STORAGE_KEY = 'katla-leaderboard';
 
 const App: React.FC = () => {
-    const [theme, setTheme] = useState<Theme>(THEMES.slate);
+    const [theme, setTheme] = useState<Theme>(THEMES.macOS);
     const [language, setLanguage] = useState<Language>('en');
     const [connectionState, setConnectionState] = useState<ConnectionState>({ status: 'disconnected', message: 'Enter a TikTok @username to connect.' });
     const [roomStats, setRoomStats] = useState<RoomStats>({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
@@ -145,7 +144,7 @@ const App: React.FC = () => {
         setChatMessages([]);
         setGiftMessages([]);
         setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
-        setLeaderboard([]); // This will clear the state and localStorage via the useEffect hook
+        // Removed: setLeaderboard([]); // This was clearing the leaderboard on every new connection
         
         setConnectionState({ status: 'connecting', message: t.connect_connecting(uniqueId) });
         tiktokSocket.connect(effectiveUniqueId);
