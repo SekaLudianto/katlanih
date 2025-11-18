@@ -1,0 +1,5 @@
+{
+  "name": "Katla: TikTok Live Battle",
+  "description": "An interactive Indonesian Wordle (Katla) game designed for TikTok Live. Viewers guess the word through live chat comments, and the game features a 'Male vs. Female' battle, tracking scores for each winning guess. The application is powered by Gemini AI for word generation and validation.",
+  "requestFramePermissions": []
+}
