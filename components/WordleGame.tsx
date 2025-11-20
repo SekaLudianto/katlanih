@@ -1,9 +1,8 @@
 
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState, WordleGameHandle, WordleGameProps, Language } from '../types';
+import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, WordleGameHandle, WordleGameProps } from '../types';
 import { WORD_LENGTH, MAX_SCORE, DECAY_RATE } from '../constants';
 import { Icons } from './Icons';
-import { translations } from '../localization';
 
 interface BestGuess {
     guess: string;
@@ -371,6 +370,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                                 <div className="flex flex-col items-center justify-center animate-fade-in space-y-3">
                                     <h3 className="text-2xl font-bold text-red-400">{t.overlay_times_up_title}</h3>
                                     <p className="text-white/80">{t.overlay_correct_word}</p>
+
                                     <div className="flex items-center justify-center gap-2">
                                         {targetWord.split('').map((letter, i) => (
                                             <div key={i} className={`w-12 h-12 flex items-center justify-center text-2xl font-bold uppercase rounded-md text-white ${theme.tileCorrect}`}>

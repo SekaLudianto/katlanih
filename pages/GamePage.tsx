@@ -1,8 +1,9 @@
 
 
 
+
 import React, { useState } from 'react';
-import { Theme, RoomStats, ChatMessage, GiftMessage, AppTab, ConnectionState, LeaderboardEntry, RoundWinner, ToastState, Language, WordleGameHandle, GamePageProps } from '../types';
+import { AppTab, GamePageProps } from '../types';
 import { RoomStatsDisplay } from '../components/RoomStatsDisplay';
 import { WordleGame } from '../components/WordleGame';
 import { ChatBox } from '../components/ChatBox';
@@ -10,7 +11,6 @@ import { GiftBox } from '../components/GiftBox';
 import { Icons } from '../components/Icons';
 import { BottomNavBar } from '../components/BottomNavBar';
 import { LeaderboardDisplay } from '../components/LeaderboardDisplay';
-import { translations } from '../localization';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useWindowSize } from '../hooks/useWindowSize';
 import { WinnerCountSetting } from '../components/WinnerCountSetting';
