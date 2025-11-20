@@ -70,6 +70,11 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
     }, [indonesianWordList, englishWordList, language]);
 
     const startRound = useCallback(() => {
+        // Prevent starting a new round if one is already running
+        if (gameState === 'running') {
+            return;
+        }
+
         const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
         if (currentWordList.length === 0) {
              console.warn(`Word list for language '${language}' not available. Cannot start the game.`);
@@ -94,7 +99,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 return prev - 1;
             });
         }, 1000);
-    }, [indonesianWordList, englishWordList, language, startNextWordInternal]);
+    }, [gameState, indonesianWordList, englishWordList, language, startNextWordInternal]);
 
     useEffect(() => {
         const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
