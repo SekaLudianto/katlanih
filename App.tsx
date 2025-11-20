@@ -34,6 +34,7 @@ const App: React.FC = () => {
         }
     });
     const [isSimulationMode, setIsSimulationMode] = useState(false);
+    const [winnerCount, setWinnerCount] = useState<number>(10);
 
     // Gift Alert State
     const [giftAlertQueue, setGiftAlertQueue] = useState<GiftMessage[]>([]);
@@ -268,6 +269,8 @@ const App: React.FC = () => {
                     t={t}
                     language={language}
                     setLanguage={setLanguage}
+                    winnerCount={winnerCount}
+                    setWinnerCount={setWinnerCount}
                 />
             ) : (
                 <ConnectionPage

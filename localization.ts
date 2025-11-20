@@ -54,6 +54,14 @@ const translationData = {
         en: "Language",
         id: "Bahasa"
     },
+    settings_winner_count_title: {
+        en: "Round Winners",
+        id: "Pemenang Ronde"
+    },
+    settings_winner_count_description: {
+        en: "Number of winners needed to end the round.",
+        id: "Jumlah pemenang yang dibutuhkan untuk mengakhiri ronde."
+    },
     // Room Stats
     room_stats_title: {
         en: "Room Stats",
@@ -93,12 +101,12 @@ const translationData = {
     overlay_correct_word: { en: "The correct word was:", id: "Kata yang benar adalah:" },
     overlay_next_round: { en: "Next round starts in...", id: "Ronde berikutnya dimulai dalam..." },
     overlay_waiting_next: { 
-        en: "Type <code class='p-1.5 rounded bg-black/50 text-cyan-400'>!next</code> in comment for the next word!",
-        id: "Ketik <code class='p-1.5 rounded bg-black/50 text-cyan-400'>!next</code> di komentar untuk kata berikutnya!"
+        en: "Type <code class='p-1.5 rounded bg-black/50 text-cyan-400'>!next</code> in chat for the next word!",
+        id: "Ketik <code class='p-1.5 rounded bg-black/50 text-cyan-400'>!next</code> di obrolan untuk kata berikutnya!"
     },
     overlay_waiting_likes: {
         en: "Tap-Tap the screen for likes!",
-        id: "Tap-tap layar jika kamu suka game ini!"
+        id: "Ketuk-Ketuk layar untuk suka!"
     },
     // Dynamic Connection Messages
     connect_init: {
@@ -140,15 +148,15 @@ const translationData = {
     },
     rank_toast: {
         en: (nickname: string, rank: number, score: number) => `${nickname}, you are rank #${rank} with ${score} points!`,
-        id: (nickname: string, rank: number, score: number) => `${nickname}, Kamu peringkat #${rank} dengan ${score} poin!`
+        id: (nickname: string, rank: number, score: number) => `${nickname}, Anda peringkat #${rank} dengan ${score} poin!`
     },
     rank_toast_not_found: {
         en: (nickname: string) => `${nickname}, you're not on the leaderboard yet. Keep playing!`,
-        id: (nickname: string) => `${nickname}, Kamu belum ada di papan peringkat. Teruslah bermain!`
+        id: (nickname: string) => `${nickname}, Anda belum ada di papan peringkat. Teruslah bermain!`
     },
     info_toast_filter: {
         en: "If your word is filtered, try sending it in a sentence!",
-        id: "Jika katamu difilter, coba kirim dalam bentuk kalimat!"
+        id: "Jika katamu difilter, coba kirim dalam kalimat!"
     },
     error_not_in_dictionary: {
         en: (guess: string) => `'${guess}' not in dictionary.`,
@@ -156,7 +164,7 @@ const translationData = {
     },
     info_already_solved: {
         en: "You've already solved this word!",
-        id: "Kamu sudah menyelesaikan kata ini!"
+        id: "Anda sudah menyelesaikan kata ini!"
     },
 };
 

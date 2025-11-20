@@ -1,17 +1,9 @@
 
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState, WordleGameHandle } from '../types';
+import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, LeaderboardEntry, ToastState, WordleGameHandle, WordleGameProps, Language } from '../types';
 import { WORD_LENGTH, MAX_SCORE, DECAY_RATE } from '../constants';
 import { Icons } from './Icons';
 import { translations } from '../localization';
-
-interface WordleGameProps {
-    theme: Theme;
-    leaderboard: LeaderboardEntry[];
-    onScoresCalculated: (winners: RoundWinner[]) => void;
-    showToast: (message: string, type?: ToastState['type']) => void;
-    t: typeof translations.en;
-}
 
 interface BestGuess {
     guess: string;
@@ -22,12 +14,13 @@ interface BestGuess {
 const ROUND_DURATION = 300; // 5 minutes in seconds
 const RESTART_DURATION = 10; // 10 seconds
 
-export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme, leaderboard, onScoresCalculated, showToast, t }, ref) => {
+export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme, leaderboard, onScoresCalculated, showToast, t, winnerCount, language }, ref) => {
     const [targetWord, setTargetWord] = useState('');
     const [guesses, setGuesses] = useState<Tile[][]>([]);
     const [guessers, setGuessers] = useState<ChatMessage[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [wordList, setWordList] = useState<string[]>([]);
+    const [indonesianWordList, setIndonesianWordList] = useState<string[]>([]);
+    const [englishWordList, setEnglishWordList] = useState<string[]>([]);
     
     const [gameState, setGameState] = useState<GameState>('idle');
     const [startTime, setStartTime] = useState<number>(0);
@@ -43,10 +36,17 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
     const boardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        // Fetch Indonesian word list
         fetch('/wordlist.json')
             .then(res => res.json())
-            .then(data => setWordList(data.map((word: string) => word.toUpperCase())))
-            .catch(err => console.error("Failed to load word list:", err));
+            .then(data => setIndonesianWordList(data.map((word: string) => word.toUpperCase())))
+            .catch(err => console.error("Failed to load Indonesian word list:", err));
+
+        // Fetch English word list
+        fetch('https://raw.githubusercontent.com/SekaLudianto/katla-battle/refs/heads/main/wordle_words.json')
+            .then(res => res.json())
+            .then(data => setEnglishWordList(data.map((word: string) => word.toUpperCase())))
+            .catch(err => console.error("Failed to load English word list:", err));
     }, []);
     
      useEffect(() => {
@@ -55,8 +55,11 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         }
     }, [guesses]);
 
-    const startNextWordInternal = useCallback(() => { // Renamed to internal helper
-        const randomWord = wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
+    const startNextWordInternal = useCallback(() => {
+        const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
+        if (currentWordList.length === 0) return;
+
+        const randomWord = currentWordList[Math.floor(Math.random() * currentWordList.length)].toUpperCase();
         setTargetWord(randomWord);
         setGuesses([]);
         setGuessers([]);
@@ -64,12 +67,13 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
         setRoundWinners([]);
         setStartTime(Date.now());
         setGameState('running');
-        console.log(`New Word: ${randomWord}`);
-    }, [wordList]);
+        console.log(`New Word (${language}): ${randomWord}`);
+    }, [indonesianWordList, englishWordList, language]);
 
     const startRound = useCallback(() => {
-        if (wordList.length === 0) {
-             console.warn("Word list not available. Cannot start the game.");
+        const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
+        if (currentWordList.length === 0) {
+             console.warn(`Word list for language '${language}' not available. Cannot start the game.`);
             return;
         }
         
@@ -91,13 +95,14 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 return prev - 1;
             });
         }, 1000);
-    }, [wordList, startNextWordInternal]);
+    }, [indonesianWordList, englishWordList, language, startNextWordInternal]);
 
     useEffect(() => {
-        if (gameState === 'idle' && wordList.length > 0) {
+        const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
+        if (gameState === 'idle' && currentWordList.length > 0) {
             startRound();
         }
-    }, [gameState, wordList, startRound]);
+    }, [gameState, indonesianWordList, englishWordList, language, startRound]);
 
     useEffect(() => {
         if (gameState === 'round_over') {
@@ -153,7 +158,8 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
 
     useImperativeHandle(ref, () => ({
         handleGuess: (guess: string, userData: ChatMessage) => {
-            if (wordList.length === 0) {
+            const currentWordList = language === 'id' ? indonesianWordList : englishWordList;
+            if (currentWordList.length === 0) {
                 return;
             }
 
@@ -161,7 +167,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 return;
             }
             
-            if (!wordList.includes(guess)) {
+            if (!currentWordList.includes(guess)) {
                 showToast(t.error_not_in_dictionary(guess));
                 return;
             }
@@ -186,7 +192,7 @@ export const WordleGame = forwardRef<WordleGameHandle, WordleGameProps>(({ theme
                 const updatedWinners = [...roundWinners, newWinner].sort((a,b) => a.duration - b.duration);
                 setRoundWinners(updatedWinners);
 
-                if (updatedWinners.length >= 10) {
+                if (updatedWinners.length >= winnerCount) {
                     onScoresCalculated(updatedWinners);
                     setGameState('solved');
                 }

@@ -6,6 +6,8 @@ export const WORD_LENGTH = 5;
 export const MAX_SCORE = 500;
 export const DECAY_RATE = 2; // Score decreases by 2 for every second taken
 export const MODERATOR_USERNAMES = ['achmadsyams', 'ahmadsyams.jpg'];
+export const MIN_WINNERS = 1;
+export const MAX_WINNERS = 20;
 
 export const THEMES: { [key: string]: Theme } = {
     slate: {

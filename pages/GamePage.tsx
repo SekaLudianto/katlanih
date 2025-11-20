@@ -1,9 +1,10 @@
 
+
+
 import React, { useState } from 'react';
-import { Theme, RoomStats, ChatMessage, GiftMessage, AppTab, ConnectionState, LeaderboardEntry, RoundWinner, ToastState, Language } from '../types';
+import { Theme, RoomStats, ChatMessage, GiftMessage, AppTab, ConnectionState, LeaderboardEntry, RoundWinner, ToastState, Language, WordleGameHandle, GamePageProps } from '../types';
 import { RoomStatsDisplay } from '../components/RoomStatsDisplay';
 import { WordleGame } from '../components/WordleGame';
-import { WordleGameHandle } from '../types';
 import { ChatBox } from '../components/ChatBox';
 import { GiftBox } from '../components/GiftBox';
 import { Icons } from '../components/Icons';
@@ -12,24 +13,7 @@ import { LeaderboardDisplay } from '../components/LeaderboardDisplay';
 import { translations } from '../localization';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useWindowSize } from '../hooks/useWindowSize';
-
-interface GamePageProps {
-    theme: Theme;
-    roomStats: RoomStats;
-    chatMessages: ChatMessage[];
-    giftMessages: GiftMessage[];
-    wordleGameRef: React.RefObject<WordleGameHandle>;
-    setModal: (modal: { isOpen: boolean; title: string; content: React.ReactNode }) => void;
-    connectionState: ConnectionState;
-    onDisconnect: () => void;
-    onReconnect: () => void;
-    leaderboard: LeaderboardEntry[];
-    onScoresCalculated: (winners: RoundWinner[]) => void;
-    showToast: (message: string, type?: ToastState['type']) => void;
-    t: typeof translations.en;
-    language: Language;
-    setLanguage: (lang: Language) => void;
-}
+import { WinnerCountSetting } from '../components/WinnerCountSetting';
 
 export const GamePage: React.FC<GamePageProps> = (props) => {
     const [activeTab, setActiveTab] = useState<AppTab>('game');
@@ -54,6 +38,12 @@ export const GamePage: React.FC<GamePageProps> = (props) => {
                              <h3 className="font-semibold text-white/80 text-center mb-3">{props.t.settings_language_title}</h3>
                              <LanguageSwitcher language={props.language} setLanguage={props.setLanguage} />
                         </div>
+                         <WinnerCountSetting
+                            winnerCount={props.winnerCount}
+                            setWinnerCount={props.setWinnerCount}
+                            theme={props.theme}
+                            t={props.t}
+                        />
                         <RoomStatsDisplay roomStats={props.roomStats} theme={props.theme} t={props.t} />
                         <button
                             onClick={props.onDisconnect}
@@ -74,6 +64,8 @@ export const GamePage: React.FC<GamePageProps> = (props) => {
                         onScoresCalculated={props.onScoresCalculated}
                         showToast={props.showToast}
                         t={props.t}
+                        winnerCount={props.winnerCount}
+                        language={props.language}
                     />
                 );
         }
@@ -106,6 +98,8 @@ export const GamePage: React.FC<GamePageProps> = (props) => {
                                     onScoresCalculated={props.onScoresCalculated}
                                     showToast={props.showToast}
                                     t={props.t}
+                                    winnerCount={props.winnerCount}
+                                    language={props.language}
                                 />
                             </div>
                             <div className="col-span-1 grid grid-rows-2 gap-6 min-h-0">

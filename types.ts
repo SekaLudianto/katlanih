@@ -90,3 +90,33 @@ export interface WordleGameHandle {
     startRound: () => void; // Changed from startNextWord to startRound
     forceEndRound: () => void;
 }
+
+export interface GamePageProps {
+    theme: Theme;
+    roomStats: RoomStats;
+    chatMessages: ChatMessage[];
+    giftMessages: GiftMessage[];
+    wordleGameRef: React.RefObject<WordleGameHandle>;
+    setModal: (modal: { isOpen: boolean; title: string; content: React.ReactNode }) => void;
+    connectionState: ConnectionState;
+    onDisconnect: () => void;
+    onReconnect: () => void;
+    leaderboard: LeaderboardEntry[];
+    onScoresCalculated: (winners: RoundWinner[]) => void;
+    showToast: (message: string, type?: ToastState['type']) => void;
+    t: any;
+    language: Language;
+    setLanguage: (lang: Language) => void;
+    winnerCount: number;
+    setWinnerCount: (count: number) => void;
+}
+
+export interface WordleGameProps {
+    theme: Theme;
+    leaderboard: LeaderboardEntry[];
+    onScoresCalculated: (winners: RoundWinner[]) => void;
+    showToast: (message: string, type?: ToastState['type']) => void;
+    t: any;
+    winnerCount: number;
+    language: Language;
+}
