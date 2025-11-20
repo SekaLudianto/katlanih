@@ -11,7 +11,6 @@ import { GiftAlert } from './components/GiftAlert';
 import { translations } from './localization';
 
 const LEADERBOARD_STORAGE_KEY = 'katla-leaderboard';
-const USERNAME_STORAGE_KEY = 'katla-last-user';
 
 const App: React.FC = () => {
     const [theme, setTheme] = useState<Theme>(THEMES.macOS);
@@ -23,9 +22,8 @@ const App: React.FC = () => {
     const [modal, setModal] = useState<{ isOpen: boolean; title: string; content: React.ReactNode }>({ isOpen: false, title: '', content: null });
     const [toast, setToast] = useState<ToastState>({ isOpen: false, message: '', type: 'error' });
 
-    const [connectedUser, setConnectedUser] = useState<string | null>(() => localStorage.getItem(USERNAME_STORAGE_KEY));
-    const [connectingUser, setConnectingUser] = useState<string | null>(null);
-
+    const [hasConnectedOnce, setHasConnectedOnce] = useState(false);
+    const [lastUniqueId, setLastUniqueId] = useState('');
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => {
         try {
             const savedLeaderboard = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
@@ -44,23 +42,15 @@ const App: React.FC = () => {
     const [isGiftAlertVisible, setIsGiftAlertVisible] = useState(false);
 
     const wordleGameRef = useRef<WordleGameHandle>(null);
+    // FIX: Changed NodeJS.Timeout to ReturnType<typeof setTimeout> for browser compatibility.
     const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const t = translations[language];
 
-    // Auto-connect if a user was previously connected
     useEffect(() => {
-        if (connectedUser) {
-            handleConnect(connectedUser);
-        }
-    }, []); // Run only on mount
-
-    useEffect(() => {
-        // Update initial message on language change if not connected
-        if (!connectedUser) {
-            setConnectionState(prev => ({ ...prev, message: t.connect_init }));
-        }
-    }, [t, connectedUser]);
+        // Update initial message on language change
+        setConnectionState(prev => ({ ...prev, message: t.connect_init }));
+    }, [t]);
 
     // Save leaderboard to localStorage whenever it changes
     useEffect(() => {
@@ -84,7 +74,7 @@ const App: React.FC = () => {
         const comment = msg.comment.trim().toLowerCase();
 
         if (comment === '!next') {
-            wordleGameRef.current?.startRound();
+            wordleGameRef.current?.startRound(); // Changed to startRound
             return;
         }
 
@@ -150,31 +140,29 @@ const App: React.FC = () => {
         }
 
         const effectiveUniqueId = isSimulationMode ? `sim_${uniqueId}` : uniqueId;
-        
-        setConnectingUser(uniqueId); // Store the user we are attempting to connect to
+
+        setLastUniqueId(effectiveUniqueId);
         setChatMessages([]);
         setGiftMessages([]);
         setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
+        // Removed: setLeaderboard([]); // This was clearing the leaderboard on every new connection
         
         setConnectionState({ status: 'connecting', message: t.connect_connecting(uniqueId) });
         tiktokSocket.connect(effectiveUniqueId);
     }, [showToast, isSimulationMode, t]);
 
     const handleReconnect = useCallback(() => {
-        if (connectingUser) {
-            setConnectionState({ status: 'connecting', message: t.connect_reconnecting(connectingUser.replace('sim_','')) });
-            tiktokSocket.connect(connectingUser);
-        } else if (connectedUser) {
-            handleConnect(connectedUser);
+        if (lastUniqueId) {
+            setConnectionState({ status: 'connecting', message: t.connect_reconnecting(lastUniqueId.replace('sim_','')) });
+            tiktokSocket.connect(lastUniqueId);
         }
-    }, [connectingUser, connectedUser, t, handleConnect]);
+    }, [lastUniqueId, t]);
     
     const handleDisconnect = useCallback(() => {
         tiktokSocket.disconnect();
-        localStorage.removeItem(USERNAME_STORAGE_KEY);
-        setConnectedUser(null);
-        setConnectingUser(null);
         setConnectionState({ status: 'disconnected', message: t.connect_disconnected_by_user });
+        setHasConnectedOnce(false);
+        setLastUniqueId('');
     }, [t]);
 
     const handleScoresCalculated = useCallback((winners: RoundWinner[]) => {
@@ -213,13 +201,9 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const handleTiktokConnected = (state: { roomId: string }) => {
-            if (connectingUser) {
-                const message = isSimulationMode ? t.connect_connected_sim : t.connect_connected_real(state.roomId);
-                setConnectionState({ status: 'connected', message });
-                localStorage.setItem(USERNAME_STORAGE_KEY, connectingUser);
-                setConnectedUser(connectingUser);
-                setConnectingUser(null);
-            }
+            const message = isSimulationMode ? t.connect_connected_sim : t.connect_connected_real(state.roomId);
+            setConnectionState({ status: 'connected', message });
+            setHasConnectedOnce(true);
         };
         const handleTiktokDisconnected = (reason: string) => {
             setConnectionState({ status: 'error', message: t.connect_disconnected_error(reason) });
@@ -248,17 +232,17 @@ const App: React.FC = () => {
             tiktokSocket.off('chat', handleChat);
             tiktokSocket.off('gift', handleGift);
         };
-    }, [isSimulationMode, handleChat, handleGift, handleLike, leaderboard, showToast, t, connectingUser]);
+    }, [isSimulationMode, handleChat, handleGift, handleLike, leaderboard, showToast, t]);
 
     useEffect(() => {
-        if (connectedUser) {
+        if (hasConnectedOnce) {
             const intervalId = setInterval(() => {
                 showToast(t.info_toast_filter, 'info', 5000);
             }, 45000);
 
             return () => clearInterval(intervalId);
         }
-    }, [connectedUser, showToast, t]);
+    }, [hasConnectedOnce, showToast, t]);
     
     useEffect(() => {
         return () => {
@@ -268,7 +252,7 @@ const App: React.FC = () => {
 
     return (
         <div className={`min-h-screen ${theme.bg} ${theme.text} flex flex-col`}>
-            {connectedUser ? (
+            {hasConnectedOnce ? (
                 <GamePage
                     theme={theme}
                     roomStats={roomStats}
