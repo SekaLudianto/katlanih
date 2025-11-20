@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Theme, Tile, TileStatus, ChatMessage, GameState, RoundWinner, WordleGameHandle, WordleGameProps } from '../types';
+import { Tile, TileStatus, ChatMessage, GameState, RoundWinner, WordleGameHandle, WordleGameProps } from '../types';
 import { WORD_LENGTH, MAX_SCORE, DECAY_RATE } from '../constants';
 import { Icons } from './Icons';
 
